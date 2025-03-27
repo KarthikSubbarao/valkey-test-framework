@@ -1,9 +1,6 @@
 from conftest import resource_port_tracker
 from valkey_test_case import ValkeyTestCase
 import pytest
-
-# Add the src directory to sys.path
-# TODO: Once we publish this package to PyPI, update the paths for importing these test resources.
 import sys
 import os
 
