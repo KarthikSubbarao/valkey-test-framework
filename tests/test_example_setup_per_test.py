@@ -5,7 +5,11 @@ import sys
 import os
 
 
-class TestCaseBase2(ValkeyTestCase):
+class TestExamplePerTestSetup(ValkeyTestCase):
+    """
+    Every test in this class will have a custom setup that is defined individually.
+    """
+
     def test_per_test_setup(self):
         server_path = f"{os.path.dirname(os.path.realpath(__file__))}/.build/binaries/{os.environ['SERVER_VERSION']}/valkey-server"
         additional_startup_args = ""

@@ -1,5 +1,9 @@
 # valkey-test-framework
-Valkey-test-frmaework is a python framework for creating integration testwork for Valkey. With this users can easily set up python integration tests for modules ...(Others?). This framwork allows for replication testing using the `ReplicationTestCase` and for default builds in Valkey. This package allows the user to specify specific versions of Valkey that you may want to test against as well as letting you change startup arguments as you need.
+Valkey-test-framework is a python framework for creating integration tests using Valkey. With this, users developing software around Valkey (e.g Modules, extensions to Valkey, or even core Valkey itself) can easily set up python integration tests to validate functionality. The framework is designed to be simple and flexible.
+
+It allows various functionalities including: Starting up custom Valkey Servers per TestClass or per individual Test, Customizing server startup arguments (e.g. module load, configs), custom server binary path, Replication Testing, Waiter functionlity, etc.
+
+It uses pytest for identifying test files (and running the individual test classes containing all the tests). The framework is compatible with pytest verions up till 7.4.3.
 
 ## Build instructions
 
@@ -9,27 +13,58 @@ cd valkey-test-framework
 ./build.sh
 ```
 
-## Specifying on a test level
+## Usage
 
-If you want to have specific start up for certain tests, first inherit ValkeyTestCase then in your test class put the following at the beginning:
+**Using a customized Valkey Server per Individual Test**
+
+If you want to have a specific start up for certain tests, first inherit ValkeyTestCase in your test class, and then customize the server creation per individual test. 
 ```
-    args = {"argument_name":"argument_value", "argument_name":"argument_value"}
-    server_path = "path_to_your_valkey_server_binary"
-    self.server, self.client = self.create_server(testdir = self.testdir,  server_path=server_path, args=args)
+class TestExamplePerTestSetup(ValkeyTestCase):
+    def test_basic1(self):
+        server_path = "/path_to_your_valkey_server_binary"
+        additional_startup_args = {"config1_name":"config_value1", "config2_name":"config_value2"}
+        self.server, self.client = self.create_server(
+            testdir=self.testdir, server_path=server_path, args=additional_startup_args
+        )
+        self.client.execute_command("PING")
+
+    def test_basic2(self):
+        server_path = "/path_to_your_valkey_server_binary"
+        # Example of no startup args
+        additional_startup_args = ""
+        self.server, self.client = self.create_server(
+            testdir=self.testdir, server_path=server_path, args=additional_startup_args
+        )
+        self.client.execute_command("SET K V")
 ```
 
-## Specifying on a package level
+**Using a customized Valkey Server per Test Class**
 
-If you want all tests to have the same startup arguments then we have made this simple by reducing the number of times that you need to specify arguments or version. In your test directory add a python file with name of your choosing and have every test inherit the class where you specify the code below:
+If you want all tests to have the same startup arguments, we have made this simple by reducing the number of times that you need to specify arguments or version. Have a Base Class that does a common server setup and have every Test Class inherit the common Base Class:
 
 ```
-class UsersTestCaseBase(ValkeyTestCase):
-
+class ExampleTestCaseBase(ValkeyTestCase):
     @pytest.fixture(autouse=True)
     def setup_test(self, setup):
-        args = {"argument_name":"argument_value", "argument_name":"argument_value"}
-        server_path = "path_to_your_valkey_server_binary"
-        self.server, self.client = self.create_server(testdir = self.testdir,  server_path=server_path, args=args)
+        server_path = "/path_to_your_valkey_server_binary"
+        # Example of no startup args
+        additional_startup_args = ""
+        self.server, self.client = self.create_server(
+            testdir=self.testdir, server_path=server_path, args=additional_startup_args
+        )
+
+class TestExamplePerClassSetup(ExampleTestCaseBase):
+    """
+    Every test will use the same server startup from the ExampleTestCaseBase.
+    """
+
+    def test_basic1(self):
+        client = self.server.get_new_client()
+        client.execute_command("PING")
+
+    def test_basic2(self):
+        client = self.server.get_new_client()
+        client.execute_command("SET K V")
 ```
 
-This framework is designed to be flexible so you can mix and match arguments and server version
+For more examples, refer to the `tests` directory of this package.

@@ -5,7 +5,7 @@ import sys
 import os
 
 
-class TestCaseBase(ValkeyTestCase):
+class ExampleTestCaseBase(ValkeyTestCase):
     @pytest.fixture(autouse=True)
     def setup_test(self, setup):
         server_path = f"{os.path.dirname(os.path.realpath(__file__))}/.build/binaries/{os.environ['SERVER_VERSION']}/valkey-server"
@@ -15,8 +15,15 @@ class TestCaseBase(ValkeyTestCase):
         )
 
 
-class TestBasic(TestCaseBase):
+class TestExamplePerClassSetup(ExampleTestCaseBase):
+    """
+    Every test will use the same server startup from the ExampleTestCaseBase.
+    """
 
-    def test_basic(self):
+    def test_basic1(self):
         client = self.server.get_new_client()
         client.execute_command("PING")
+
+    def test_basic2(self):
+        client = self.server.get_new_client()
+        client.execute_command("SET K V")
