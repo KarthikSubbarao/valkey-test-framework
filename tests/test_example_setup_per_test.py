@@ -38,4 +38,3 @@ class TestExamplePerTestSetup(ValkeyTestCase):
             server_path=server_path,
         )
         self.new_client.execute_command("SET KEY VAL")
-        self.new_server.exit()

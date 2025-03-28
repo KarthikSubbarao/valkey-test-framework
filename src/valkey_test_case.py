@@ -509,9 +509,10 @@ class ValkeyTestCase(ValkeyTestCaseBase):
         self.server.wait_for_replicas(n)
 
     def teardown(self):
-        if self.server:
-            self.server.exit()
-            self.server = None
+        for server in self.server_list:
+            if server:
+                server.exit()
+                server = None
 
 
 class ValkeyReplica(ValkeyServerHandle):
