@@ -22,7 +22,7 @@ class TestExampleReuseReplicationSetupPerClass(ReplicationTestCase):
             "repl-diskless-sync-delay": "0",
         }
         (
-            TestExampleReuseReplicationSetupPerClass.common_server,
+            primary_server,
             TestExampleReuseReplicationSetupPerClass.common_client,
         ) = self.create_server(
             testdir=self.testdir,
@@ -30,9 +30,11 @@ class TestExampleReuseReplicationSetupPerClass(ReplicationTestCase):
             args=additional_startup_args,
             skip_teardown=True,
         )
-        self.server = TestExampleReuseReplicationSetupPerClass.common_server
+        TestExampleReuseReplicationSetupPerClass.common_server = primary_server
         TestExampleReuseReplicationSetupPerClass.common_replicas = (
-            self.setup_replication(num_replicas=1, skip_teardown=True)
+            self.setup_replication(
+                num_replicas=1, skip_teardown=True, primary_server=primary_server
+            )
         )
 
     @pytest.mark.order(1)

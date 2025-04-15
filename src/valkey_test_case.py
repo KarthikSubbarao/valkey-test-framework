@@ -550,14 +550,22 @@ class ReplicationTestCase(ValkeyTestCase):
     num_replicas = 0
     skip_teardown = False
     replicas = []
+    # Primary server
+    server = None
 
-    def setup_replication(self, num_replicas=num_replicas, skip_teardown=False):
+    def setup_replication(
+        self, num_replicas=1, primary_server=None, skip_teardown=False
+    ):
+        self.num_replicas = num_replicas
+        self.replicas = []
+        if primary_server is not None:
+            self.server = primary_server
+        self.skip_teardown = skip_teardown
         self.create_replicas(num_replicas)
         self.start_replicas()
         self.wait_for_replicas(self.num_replicas)
         self.wait_for_primary_link_up_all_replicas()
         self.wait_for_all_replicas_online(self.num_replicas)
-        self.skip_teardown = skip_teardown
         for i in range(len(self.replicas)):
             self.waitForReplicaToSyncUp(self.replicas[i])
         return self.replicas
@@ -607,8 +615,6 @@ class ReplicationTestCase(ValkeyTestCase):
         if not primaryport:
             primaryport = default_port
 
-        self.num_replicas = num_replicas
-        self.replicas = []
         for _ in range(self.num_replicas):
             replica = self._create_replica(primaryhost, primaryport, server_path)
             replica.set_startup_args(self.args)
