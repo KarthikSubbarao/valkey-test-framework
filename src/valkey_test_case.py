@@ -547,20 +547,25 @@ class ValkeyReplica(ValkeyServerHandle):
 
 
 class ReplicationTestCase(ValkeyTestCase):
-    num_replicas = 1
+    num_replicas = 0
+    skip_teardown = False
+    replicas = []
 
-    def setup_replication(self, num_replicas=num_replicas):
+    def setup_replication(self, num_replicas=num_replicas, skip_teardown=False):
         self.create_replicas(num_replicas)
         self.start_replicas()
         self.wait_for_replicas(self.num_replicas)
         self.wait_for_primary_link_up_all_replicas()
         self.wait_for_all_replicas_online(self.num_replicas)
+        self.skip_teardown = skip_teardown
         for i in range(len(self.replicas)):
             self.waitForReplicaToSyncUp(self.replicas[i])
+        return self.replicas
 
     def teardown(self):
-        self.destroy_replicas()
-        ValkeyTestCase.teardown(self)
+        if not self.skip_teardown:
+            self.destroy_replicas()
+            ValkeyTestCase.teardown(self)
 
     def _create_replica(self, primaryhost, primaryport, server_path):
         return ValkeyReplica(
