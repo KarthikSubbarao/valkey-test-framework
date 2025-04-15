@@ -7,7 +7,7 @@ import os
 
 class TestExampleReuseSetupPerClass(ValkeyTestCase):
     """
-    Every test will use the same server and client instance and the server will be torn down down in the final test.
+    Every test will use the same server and client instance and the server will be torn down in the final test.
     This also adds ordering of the tests in a serial manner.
     """
 
